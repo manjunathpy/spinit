@@ -1,0 +1,56 @@
+<div class="game-container">
+  <!-- Input Section -->
+  <div class="input-section">
+    <label for="playerCount">Number of Players</label>
+    <input 
+      type="number" 
+      id="playerCount"
+      [(ngModel)]="playerCount" 
+      (input)="onPlayerCountChange()"
+      min="2" 
+      max="12" 
+      [disabled]="isSpinning"
+    >
+  </div>
+
+  <!-- Game Area -->
+  <div class="game-area" #gameArea>
+    <!-- Player Markers -->
+    <div 
+      *ngFor="let marker of playerMarkers" 
+      class="player-marker"
+      [class.selected]="marker.selected"
+      [style.left]="'calc(50% + ' + marker.x + 'px - 20px)'"
+      [style.top]="'calc(50% + ' + marker.y + 'px - 20px)'"
+    >
+      P{{ marker.id }}
+    </div>
+
+    <!-- Bottle -->
+    <img 
+      src="assets/bottle.png"
+      class="bottle"
+      [class.spinning]="isSpinning"
+      (click)="spinBottle()"
+      #bottle
+      alt="Bottle"
+      title="Click to point to a random player"
+    />
+  </div>
+
+  <!-- Status Message -->
+  <div class="status-message" [class]="statusClass">
+    {{ statusMessage }}
+  </div>
+
+  <!-- Reset Button -->
+  <button 
+    class="reset-button" 
+    (click)="resetGame()"
+    [disabled]="isSpinning"
+  >
+    Reset
+  </button>
+
+  
+</div> 

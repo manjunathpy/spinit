@@ -1,0 +1,19 @@
+{
+  "name": "Spinning Bottle Game",
+  "short_name": "Bottle Game",
+  "description": "Interactive spinning bottle game for 2-12 players",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f5f5f5",
+  "theme_color": "#4CAF50",
+  "orientation": "portrait-primary",
+  "scope": "./",
+  "icons": [
+    {
+      "src": "assets/icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

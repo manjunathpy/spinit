@@ -2,7 +2,7 @@
   "name": "Spinning Bottle Game",
   "short_name": "Bottle Game",
   "description": "Interactive spinning bottle game - click to spin and see who gets selected!",
-  "start_url": "/",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#667eea",
   "theme_color": "#1976d2",

@@ -1,7 +1,7 @@
 {
-  "name": "Spinning Bottle Game",
-  "short_name": "Bottle Game",
-  "description": "Interactive spinning bottle game - click to spin and see who gets selected!",
+  "name": "SpinIT",
+  "short_name": "SpinIT",
+  "description": "SpinIT is a fun and interactive spinning bottle game - click to spin and see who gets selected!",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#667eea",
@@ -9,10 +9,22 @@
   "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "assets/icons/icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "assets/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
       "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icons/icon-152x152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 } 

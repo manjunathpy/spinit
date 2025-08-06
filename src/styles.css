@@ -118,6 +118,14 @@ body {
   color: white;
 }
 
+.player-marker.completed {
+  background: #6c757d;
+  color: #ffffff;
+  transform: scale(1);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  animation: none;
+}
+
 @keyframes pulse {
   0% { transform: scale(1.2); }
   50% { transform: scale(1.3); }
@@ -139,7 +147,6 @@ body {
 }
 
 .status-message.success {
-  /* background: linear-gradient(145deg, #e8d09d, #ceab6d); */
   color: #0e4705;
   animation: slideIn 0.5s ease;
 }
@@ -197,11 +204,6 @@ body {
     height: 240px;
   }
   
-  .bottle {
-    width: 50px;
-    height: 100px;
-  }
-  
   .player-marker {
     width: 35px;
     height: 35px;
@@ -219,11 +221,6 @@ body {
   .game-area {
     width: 220px;
     height: 220px;
-  }
-  
-  .bottle {
-    width: 45px;
-    height: 90px;
   }
   
   .player-marker {

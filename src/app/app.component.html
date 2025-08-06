@@ -20,6 +20,7 @@
       *ngFor="let marker of playerMarkers" 
       class="player-marker"
       [class.selected]="marker.selected"
+      [class.completed]="marker.completed"
       [style.left]="'calc(50% + ' + marker.x + 'px - 20px)'"
       [style.top]="'calc(50% + ' + marker.y + 'px - 20px)'"
     >
@@ -43,13 +44,13 @@
     {{ statusMessage }}
   </div>
 
-  <!-- Reset Button -->
+  <!-- Dynamic Button -->
   <button 
     class="reset-button" 
     (click)="resetGame()"
     [disabled]="isSpinning"
   >
-    Reset
+    {{ getButtonText() }}
   </button>
 
   

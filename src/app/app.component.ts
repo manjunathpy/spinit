@@ -9,6 +9,7 @@ interface PlayerMarker {
   x: number;
   y: number;
   selected: boolean;
+  completed: boolean;
 }
 
 @Component({
@@ -29,8 +30,15 @@ export class AppComponent implements OnInit, AfterViewInit {
   statusMessage: string = ' ';
   statusClass: string = 'default';
 
+  // Enhanced state management
+  selectedPlayers: number[] = []; // Players with green background + pulse
+  completedPlayers: number[] = []; // Players with gray background
+  availablePlayers: number[] = []; // Players available for selection
+  allPlayersSelected: boolean = false;
+  unselectedCount: number = 0;
+
   private readonly GAME_AREA_RADIUS = 120; // Distance from center to player markers
-  private readonly BOTTLE_ORIGINAL_ANGLE = -90; // Bottle points up (mouth at top)
+  private readonly BOTTLE_BASE_ROTATION = 270; // Base rotation pointing to P1
 
   ngOnInit(): void {
     this.updatePlayerMarkers();
@@ -45,6 +53,7 @@ export class AppComponent implements OnInit, AfterViewInit {
    * Updates the player count and recalculates player marker positions
    * This function dynamically calculates the positions of player markers around the bottle
    * based on the specified number of players, ensuring perfect radial symmetry.
+   * Also handles edge case of player count changes by resetting game state.
    */
   updatePlayerMarkers(): void {
     this.playerMarkers = [];
@@ -80,61 +89,64 @@ export class AppComponent implements OnInit, AfterViewInit {
         angle: angle, // Store the custom angle for reference
         x: x,
         y: y,
-        selected: false
+        selected: false,
+        completed: false
       });
-      
-             // Player position calculated
-     }
+    }
     
-    // Reset game state
-    this.resetGame();
+    // Reset game state when player count changes (edge case handling)
+    this.resetGameState();
   }
 
   /**
-   * Points the bottle directly to a random player position
-   * This function randomly selects one of the player positions and
-   * rotates the bottle to point directly at that player.
+   * Spins the bottle with consistent speed and selects from available players only
+   * This function ensures the bottle spins at the same speed every time and
+   * only selects from players who haven't been selected yet.
    */
   spinBottle(): void {
-    if (this.isSpinning || this.playerCount < 2) return;
+    if (this.isSpinning || this.playerCount < 2 || this.allPlayersSelected) return;
 
     this.isSpinning = true;
     this.statusMessage = 'Selecting...';
     this.statusClass = 'default';
     this.clearSelection();
 
-    // Randomly select one of the player positions
-    const randomPlayerIndex = Math.floor(Math.random() * this.playerCount);
-    const selectedPlayerId = randomPlayerIndex + 1;
+    // Move previously selected player to completed state
+    if (this.selectedPlayer) {
+      this.completedPlayers.push(this.selectedPlayer);
+      this.selectedPlayers = this.selectedPlayers.filter(id => id !== this.selectedPlayer);
+      this.updatePlayerVisualStates();
+    }
+
+    // Select from available players only
+    const randomIndex = Math.floor(Math.random() * this.availablePlayers.length);
+    const selectedPlayerId = this.availablePlayers[randomIndex];
     
     // Calculate the exact angle for the selected player
-    let targetAngle: number;
+    const selectedMarker = this.playerMarkers.find(marker => marker.id === selectedPlayerId);
+    if (!selectedMarker) return;
     
-    if (this.playerCount === 2) {
-      // For 2 players: P1 at 0° (left), P2 at 180° (right)
-      targetAngle = randomPlayerIndex === 0 ? 0 : 180;
-    } else {
-      // For other player counts, use standard calculation
-      const sectorAngle = 360 / this.playerCount;
-      targetAngle = randomPlayerIndex * sectorAngle;
-    }
+    const targetAngle = selectedMarker.angle;
     
-         // Get the bottle element
-     const bottle = this.bottleRef.nativeElement;
+    // Get the bottle element
+    const bottle = this.bottleRef.nativeElement;
     
-        // Convert target angle to bottle rotation
+    // Convert target angle to bottle rotation
     // Your system: 0°=Left, 90°=Up, 180°=Right, 270°=Down
     // Bottle default: 0°=Up, 90°=Right, 180°=Down, 270°=Left
     const bottleRotation = (targetAngle + 270) % 360;
     
+    // Consistent spinning: Always start from base position
+    gsap.set(bottle, { rotation: this.BOTTLE_BASE_ROTATION });
+    
     // Add 2 full rotations (720 degrees) before pointing to the selected player
     const totalRotation = bottleRotation + 720;
     
-    // Rotate bottle with 2 full spins - faster spinning with deceleration
+    // Rotate bottle with consistent speed
     gsap.to(bottle, {
       rotation: totalRotation,
-      duration: 2.0, // Faster 2-second duration
-      ease: "power3.out", // More pronounced deceleration
+      duration: 2.0,
+      ease: "power3.out",
       onComplete: () => {
         this.handleDirectSelection(selectedPlayerId);
       }
@@ -150,13 +162,37 @@ export class AppComponent implements OnInit, AfterViewInit {
     
     // Update game state
     this.selectedPlayer = selectedPlayerId;
-    this.playerMarkers.forEach(marker => {
-      marker.selected = marker.id === selectedPlayerId;
-    });
+    this.selectedPlayers.push(selectedPlayerId);
+    this.availablePlayers = this.availablePlayers.filter(id => id !== selectedPlayerId);
+    this.unselectedCount = this.availablePlayers.length;
     
-    // Update status message
-    this.statusMessage = `P${selectedPlayerId} has been selected!`;
-    this.statusClass = 'success';
+    // Update visual states
+    this.updatePlayerVisualStates();
+    
+    // Check if all players have been selected
+    if (this.availablePlayers.length === 0) {
+      this.allPlayersSelected = true;
+      this.statusMessage = "Everyone's been chosen!";
+      this.statusClass = 'success';
+    } else {
+      // Update status message with remaining count 
+      this.statusMessage = `P${selectedPlayerId} Truth or Dare? ${this.unselectedCount} Remaining`;
+      this.statusClass = 'success';
+    }
+  }
+
+  /**
+   * Updates the visual states of all player markers
+   * This function applies the correct CSS classes based on player states:
+   * - Available: White background
+   * - Selected: Green background + pulse animation
+   * - Completed: Gray background
+   */
+  private updatePlayerVisualStates(): void {
+    this.playerMarkers.forEach(marker => {
+      marker.selected = this.selectedPlayers.includes(marker.id);
+      marker.completed = this.completedPlayers.includes(marker.id);
+    });
   }
 
   /**
@@ -165,22 +201,36 @@ export class AppComponent implements OnInit, AfterViewInit {
    * updates the status message to prompt for new input.
    */
   resetGame(): void {
+    this.resetGameState();
+    this.resetBottle();
+  }
+
+  /**
+   * Resets the complete game state including all tracking arrays
+   * This function is called when resetting the game or changing player count.
+   */
+  private resetGameState(): void {
     this.selectedPlayer = null;
     this.isSpinning = false;
+    this.selectedPlayers = [];
+    this.completedPlayers = [];
+    this.availablePlayers = Array.from({ length: this.playerCount }, (_, i) => i + 1);
+    this.allPlayersSelected = false;
+    this.unselectedCount = this.playerCount;
     this.clearSelection();
-    this.resetBottle();
     this.statusMessage = ' ';
     this.statusClass = 'default';
   }
 
   /**
    * Clears the visual selection of all player markers
-   * This function removes the selected state from all player markers
+   * This function removes the selected and completed states from all player markers
    * to prepare for a new game round.
    */
   private clearSelection(): void {
     this.playerMarkers.forEach(marker => {
       marker.selected = false;
+      marker.completed = false;
     });
   }
 
@@ -192,7 +242,7 @@ export class AppComponent implements OnInit, AfterViewInit {
     if (this.bottleRef) {
       const bottle = this.bottleRef.nativeElement;
       gsap.to(bottle, {
-        rotation: 270, // Point to P1 (0 degrees) - bottle default is up, so 270° points left
+        rotation: this.BOTTLE_BASE_ROTATION,
         duration: 0.5,
         ease: "power2.out"
       });
@@ -200,9 +250,29 @@ export class AppComponent implements OnInit, AfterViewInit {
   }
 
   /**
+   * Determines the appropriate button text based on current game state
+   * This function returns "Start" for new games and "Reset" for active games.
+   */
+  getButtonText(): string {
+    // Game is complete - ready for new game
+    if (this.allPlayersSelected) {
+      return "Start";
+    }
+    
+    // Game is in progress (has selected or completed players)
+    if (this.selectedPlayers.length > 0 || this.completedPlayers.length > 0) {
+      return "Reset";
+    }
+    
+    // No game started yet
+    return "Start";
+  }
+
+  /**
    * Handles input validation for player count
    * This function ensures the player count is within the valid range (2-12)
-   * and updates the game state accordingly.
+   * and updates the game state accordingly. Automatically resets game state
+   * when player count changes (edge case handling).
    */
   onPlayerCountChange(): void {
     // Ensure player count is within valid range
@@ -212,8 +282,7 @@ export class AppComponent implements OnInit, AfterViewInit {
       this.playerCount = 12;
     }
     
+    // Reset game state when player count changes
     this.updatePlayerMarkers();
   }
-
-
 } 

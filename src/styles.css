@@ -17,7 +17,7 @@ body {
 
 /* Container */
 .game-container {
-  background: linear-gradient(145deg, #ffe9b9, #efcf95);
+  background: linear-gradient(145deg, #d1b9ff, #b23916);
   border-radius: 20px;
   padding: 2rem;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
@@ -31,33 +31,74 @@ body {
 /* Input Section */
 .input-section {
   margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
 }
 
 .input-section label {
   display: block;
   font-size: 1.1rem;
   font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: #0e4705;
+  color: #ffffff;
+  text-align: center;
 }
 
 .input-section input {
-  width: 25%;
-  padding: 0.35rem;
-  border: 2px solid #e2e8f0;
-  border-radius: 2rem;
+  width: 40px;
+  height: 40px;
+  border: 2px solid transparent;
+  border-radius: 50%;
   transition: border-color 0.3s ease;
-  border-color: #e8d09d;
+  border-color: #d1c6e1;
   text-align: center;
   font-size: 1.2rem;
   font-weight: 600;
   color: #0e4705;
-  background: #ffe9b9;
+  background: transparent;
 }
 
 .input-section input:focus {
   outline: none;
   border-color: #0e4705;
+}
+
+/* Volume Button */
+.volume-button {
+  background: linear-gradient(145deg, #43b331, #0e4705);
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.volume-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+.volume-button.muted {
+  background: linear-gradient(145deg, #6c757d, #495057);
+  opacity: 0.7;
+}
+
+.volume-button:active {
+  transform: scale(0.95);
+}
+
+.volume-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 /* Game Area */
@@ -67,7 +108,7 @@ body {
   height: 280px;
   margin: 0 auto 2rem;
   border-radius: 50%;
-  background: linear-gradient(145deg, #fbeac5, #dfbf85);
+  background: linear-gradient(145deg, #e1e1e1, #ffffff);
   box-shadow: 
     inset 0 10px 20px rgba(0, 0, 0, 0.1),
     0 10px 20px rgba(0, 0, 0, 0.1);
@@ -147,7 +188,12 @@ body {
 }
 
 .status-message.success {
-  color: #0e4705;
+  color: #ffffff;
+  animation: slideIn 0.5s ease;
+}
+
+.status-message.default {
+  color: #ffffff;
   animation: slideIn 0.5s ease;
 }
 
@@ -199,6 +245,20 @@ body {
     margin: 1rem auto;
   }
   
+  .input-section {
+    gap: 0.75rem;
+  }
+  
+  .input-section input {
+    font-size: 1rem;
+  }
+  
+  .volume-button {
+    width: 35px;
+    height: 35px;
+    font-size: 1rem;
+  }
+  
   .game-area {
     width: 240px;
     height: 240px;
@@ -216,6 +276,20 @@ body {
     width: 320px;
     padding: 1.25rem;
     margin: 0.5rem auto;
+  }
+  
+  .input-section {
+    gap: 0.5rem;
+  }
+  
+  .input-section input {
+    font-size: 0.9rem;
+  }
+  
+  .volume-button {
+    width: 35px;
+    height: 35px;
+    font-size: 1rem;
   }
   
   .game-area {

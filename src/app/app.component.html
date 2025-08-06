@@ -1,7 +1,7 @@
 <div class="game-container">
   <!-- Input Section -->
   <div class="input-section">
-    <label for="playerCount">Number of Players</label>
+    <label for="playerCount">Players</label>
     <input 
       type="number" 
       id="playerCount"
@@ -11,6 +11,19 @@
       max="12" 
       [disabled]="isSpinning"
     >
+    
+    <!-- volume control -->
+    <div class="volume-control">
+      <button 
+        class="volume-button"
+        (click)="audioServiceInstance.toggleMute()"
+        [class.muted]="audioServiceInstance.isAudioMuted()"
+        [disabled]="isSpinning"
+        title="Toggle Sound"
+      >
+        {{ audioServiceInstance.isAudioMuted() ? '🔇' : '🔊' }}
+      </button>
+    </div>
   </div>
 
   <!-- Game Area -->
@@ -43,6 +56,7 @@
   <div class="status-message" [class]="statusClass">
     {{ statusMessage }}
   </div>
+
 
   <!-- Dynamic Button -->
   <button 

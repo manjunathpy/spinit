@@ -1,7 +1,8 @@
-import { Component, OnInit, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ElementRef, ViewChild, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { gsap } from 'gsap';
+import { AudioService } from './audio.service';
 
 interface PlayerMarker {
   id: number;
@@ -19,7 +20,7 @@ interface PlayerMarker {
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements OnInit, AfterViewInit {
+export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('bottle', { static: false }) bottleRef!: ElementRef;
   @ViewChild('gameArea', { static: false }) gameAreaRef!: ElementRef;
 
@@ -39,6 +40,8 @@ export class AppComponent implements OnInit, AfterViewInit {
 
   private readonly GAME_AREA_RADIUS = 120; // Distance from center to player markers
   private readonly BOTTLE_BASE_ROTATION = 270; // Base rotation pointing to P1
+
+  constructor(private audioService: AudioService) {}
 
   ngOnInit(): void {
     this.updatePlayerMarkers();
@@ -139,18 +142,24 @@ export class AppComponent implements OnInit, AfterViewInit {
     // Consistent spinning: Always start from base position
     gsap.set(bottle, { rotation: this.BOTTLE_BASE_ROTATION });
     
-    // Add 2 full rotations (720 degrees) before pointing to the selected player
-    const totalRotation = bottleRotation + 720;
-    
-    // Rotate bottle with consistent speed
-    gsap.to(bottle, {
-      rotation: totalRotation,
-      duration: 2.0,
-      ease: "power3.out",
-      onComplete: () => {
-        this.handleDirectSelection(selectedPlayerId);
-      }
-    });
+         // Add 6 full rotations (2160 degrees) before pointing to the selected player
+     const totalRotation = bottleRotation + 2160;
+     
+     // Rotate bottle with faster speed to match sound duration
+     gsap.to(bottle, {
+       rotation: totalRotation,
+       duration: 1.5, // Faster duration to match sound
+       ease: "power2.out", // Faster easing for more dynamic feel
+       onStart: () => {
+         // Start spinning sound when animation begins
+         this.audioService.playSpinningSound();
+       },
+       onComplete: () => {
+         // Stop spinning sound when animation completes
+         this.audioService.stopSpinningSound();
+         this.handleDirectSelection(selectedPlayerId);
+       }
+     });
   }
 
   /**
@@ -274,15 +283,31 @@ export class AppComponent implements OnInit, AfterViewInit {
    * and updates the game state accordingly. Automatically resets game state
    * when player count changes (edge case handling).
    */
-  onPlayerCountChange(): void {
-    // Ensure player count is within valid range
-    if (this.playerCount < 2) {
-      this.playerCount = 2;
-    } else if (this.playerCount > 12) {
-      this.playerCount = 12;
-    }
-    
-    // Reset game state when player count changes
-    this.updatePlayerMarkers();
-  }
+     onPlayerCountChange(): void {
+     // Ensure player count is within valid range
+     if (this.playerCount < 2) {
+       this.playerCount = 2;
+     } else if (this.playerCount > 12) {
+       this.playerCount = 12;
+     }
+     
+     // Reset game state when player count changes
+     this.updatePlayerMarkers();
+   }
+
+   /**
+    * Cleanup method called when component is destroyed
+    * This function ensures proper cleanup of audio resources.
+    */
+   ngOnDestroy(): void {
+     this.audioService.cleanup();
+   }
+
+   /**
+    * Expose audio service for template access
+    * This allows the template to access audio controls.
+    */
+   get audioServiceInstance(): AudioService {
+     return this.audioService;
+   }
 } 

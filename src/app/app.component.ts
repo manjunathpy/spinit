@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { gsap } from 'gsap';
 import { AudioService } from './audio.service';
+import { PwaInstallComponent } from './pwa-install.component';
 
 interface PlayerMarker {
   id: number;
@@ -16,7 +17,7 @@ interface PlayerMarker {
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, PwaInstallComponent],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
@@ -28,7 +29,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   playerMarkers: PlayerMarker[] = [];
   isSpinning: boolean = false;
   selectedPlayer: number | null = null;
-  statusMessage: string = ' ';
+  statusMessage: string = '🙂';
   statusClass: string = 'default';
 
   // Enhanced state management
@@ -39,11 +40,12 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   unselectedCount: number = 0;
 
   private readonly GAME_AREA_RADIUS = 120; // Distance from center to player markers
-  private readonly BOTTLE_BASE_ROTATION = 270; // Base rotation pointing to P1
+  private readonly BOTTLE_BASE_ROTATION = 0; // Base rotation pointing to 12 o'clock (up)
 
   constructor(private audioService: AudioService) {}
 
   ngOnInit(): void {
+    this.statusMessage = '🙂';
     this.updatePlayerMarkers();
   }
 
@@ -95,6 +97,14 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
         selected: false,
         completed: false
       });
+      
+      // Debug logging for player positions
+      console.log(`Player ${i + 1}:`, {
+        angle,
+        x: Math.round(x),
+        y: Math.round(y),
+        position: angle === 90 ? 'UP' : angle === 270 ? 'DOWN' : angle === 0 ? 'LEFT' : angle === 180 ? 'RIGHT' : `${angle}°`
+      });
     }
     
     // Reset game state when player count changes (edge case handling)
@@ -110,7 +120,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.isSpinning || this.playerCount < 2 || this.allPlayersSelected) return;
 
     this.isSpinning = true;
-    this.statusMessage = 'Selecting...';
+    this.statusMessage = '⌛';
     this.statusClass = 'default';
     this.clearSelection();
 
@@ -135,9 +145,19 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     const bottle = this.bottleRef.nativeElement;
     
     // Convert target angle to bottle rotation
-    // Your system: 0°=Left, 90°=Up, 180°=Right, 270°=Down
-    // Bottle default: 0°=Up, 90°=Right, 180°=Down, 270°=Left
-    const bottleRotation = (targetAngle + 270) % 360;
+    // Player system: 0°=Left, 90°=Up, 180°=Right, 270°=Down
+    // Bottle system: 0°=Up, 90°=Right, 180°=Down, 270°=Left
+    // Since bottle 0° points up, and P1 is at 0° (left), we need to rotate bottle 90° clockwise
+    // But the bottle's mouth (red cap) is pointing opposite to the bottom, so add 180° to flip it
+    const bottleRotation = (targetAngle + 90 + 180) % 360;
+    
+    // Debug logging
+    console.log(`Selected Player ${selectedPlayerId}:`, {
+      targetAngle,
+      bottleRotation,
+      playerPosition: `${selectedMarker.x}, ${selectedMarker.y}`,
+      expectedDirection: targetAngle === 0 ? 'LEFT' : targetAngle === 90 ? 'UP' : targetAngle === 180 ? 'RIGHT' : targetAngle === 270 ? 'DOWN' : `${targetAngle}°`
+    });
     
     // Consistent spinning: Always start from base position
     gsap.set(bottle, { rotation: this.BOTTLE_BASE_ROTATION });
@@ -185,7 +205,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
       this.statusClass = 'success';
     } else {
       // Update status message with remaining count 
-      this.statusMessage = `P${selectedPlayerId} Truth or Dare? ${this.unselectedCount} Remaining`;
+      this.statusMessage = `P${selectedPlayerId} Truth or Dare?`;
       this.statusClass = 'success';
     }
   }
@@ -244,8 +264,9 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   /**
-   * Resets the bottle to its original position pointing to P1 (0 degrees)
-   * This function animates the bottle back to pointing to P1 using GSAP for smooth transition.
+   * Resets the bottle to its original position pointing to 12 o'clock (up)
+   * This function animates the bottle back to pointing upward using GSAP for smooth transition.
+   * Note: Bottle points up (0°) but players are positioned with P1 at left (0°).
    */
   private resetBottle(): void {
     if (this.bottleRef) {
@@ -265,7 +286,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
   getButtonText(): string {
     // Game is complete - ready for new game
     if (this.allPlayersSelected) {
-      return "Start";
+      return "Reset";
     }
     
     // Game is in progress (has selected or completed players)
@@ -274,7 +295,7 @@ export class AppComponent implements OnInit, AfterViewInit, OnDestroy {
     }
     
     // No game started yet
-    return "Start";
+    return "Reset";
   }
 
   /**

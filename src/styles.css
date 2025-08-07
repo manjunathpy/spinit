@@ -17,7 +17,7 @@ body {
 
 /* Container */
 .game-container {
-  background: linear-gradient(145deg, #d1b9ff, #b23916);
+  background: linear-gradient(145deg, #fd8dfd, #2e16b2);
   border-radius: 20px;
   padding: 2rem;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
@@ -48,25 +48,23 @@ body {
 .input-section input {
   width: 40px;
   height: 40px;
-  border: 2px solid transparent;
   border-radius: 50%;
   transition: border-color 0.3s ease;
-  border-color: #d1c6e1;
   text-align: center;
   font-size: 1.2rem;
   font-weight: 600;
-  color: #0e4705;
-  background: transparent;
+  color: white;
+  background: linear-gradient(145deg, #6fd2f1, #1b398e);
+  border: none;
 }
 
 .input-section input:focus {
   outline: none;
-  border-color: #0e4705;
 }
 
 /* Volume Button */
 .volume-button {
-  background: linear-gradient(145deg, #43b331, #0e4705);
+  background: linear-gradient(145deg, #6fd2f1, #1b398e);
   color: white;
   border: none;
   width: 40px;
@@ -82,7 +80,7 @@ body {
 }
 
 .volume-button:hover {
-  transform: scale(1.1);
+  transform: translateY(-2px);
   box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
 }
 
@@ -210,16 +208,19 @@ body {
 
 /* Reset Button */
 .reset-button {
-  background: linear-gradient(145deg, #43b331, #0e4705);
-  color: white;
-  border: none;
-  padding: 0.75rem 2rem;
-  border-radius: 25px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  background: linear-gradient(145deg, #6fd2f1, #1b398e);
+    color: white;
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .reset-button:hover {

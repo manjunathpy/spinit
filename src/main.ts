@@ -8,7 +8,8 @@ bootstrapApplication(AppComponent, {
   providers: [
     provideServiceWorker('ngsw-worker.js', {
       enabled: environment.production,
-      registrationStrategy: 'registerWhenStable:30000'
+      registrationStrategy: 'registerWhenStable:30000',
+      scope: './'
     })
   ]
 }).catch(err => console.error(err)); 
